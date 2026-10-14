@@ -1,0 +1,6 @@
+﻿<Solution>
+  <Project Path="TnEcoffe.API/TnEcoffe.Api.csproj" />
+  <Project Path="TnEcoffe.Application/TnEcoffe.Application.csproj" />
+  <Project Path="TnEcoffe.Domain/TnEcoffe.Domain.csproj" />
+  <Project Path="TnEcoffe.Infrastructure/TnEcoffe.Infrastructure.csproj" />
+</Solution>
