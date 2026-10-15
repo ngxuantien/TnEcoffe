@@ -1,6 +1,13 @@
-﻿<Solution>
-  <Project Path="TnEcoffe.API/TnEcoffe.Api.csproj" />
-  <Project Path="TnEcoffe.Application/TnEcoffe.Application.csproj" />
+<Solution>
+  <Project Path="TnEcoffe.API/TnEcoffe.Api.csproj">
+    <BuildDependency Project="TnEcoffe.Application/TnEcoffe.Application.csproj" />
+    <BuildDependency Project="TnEcoffe.Infrastructure/TnEcoffe.Infrastructure.csproj" />
+  </Project>
+  <Project Path="TnEcoffe.Application/TnEcoffe.Application.csproj">
+    <BuildDependency Project="TnEcoffe.Domain/TnEcoffe.Domain.csproj" />
+  </Project>
   <Project Path="TnEcoffe.Domain/TnEcoffe.Domain.csproj" />
-  <Project Path="TnEcoffe.Infrastructure/TnEcoffe.Infrastructure.csproj" />
+  <Project Path="TnEcoffe.Infrastructure/TnEcoffe.Infrastructure.csproj">
+    <BuildDependency Project="TnEcoffe.Application/TnEcoffe.Application.csproj" />
+  </Project>
 </Solution>
