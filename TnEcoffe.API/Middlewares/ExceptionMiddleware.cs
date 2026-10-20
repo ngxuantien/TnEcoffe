@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using TnEcoffe.Api.Common;
 using TnEcoffe.Application.Common.Exceptions;
 using TnEcoffe.Domain.Common.Errors;
 

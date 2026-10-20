@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Text;
 using TnEcoffe.Domain.Common;
 
-namespace TnEcoffe.Application.Abstractions.Repository;
+namespace TnEcoffe.Application.Abstractions.Repositories;
 
 public interface IReadRepository<T> where T : BaseEntity
 {

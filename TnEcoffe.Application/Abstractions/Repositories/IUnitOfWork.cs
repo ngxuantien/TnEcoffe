@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TnEcoffe.Application.Abstractions.Repository;
+namespace TnEcoffe.Application.Abstractions.Repositories;
 
 public interface IUnitOfWork
 {

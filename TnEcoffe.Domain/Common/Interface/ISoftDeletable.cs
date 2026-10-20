@@ -11,6 +11,5 @@ namespace TnEcoffe.Domain.Common.Interface
         DateTime? DeletedAt { get; }
 
         Guid? DeletedBy { get; }
-
     }
 }
