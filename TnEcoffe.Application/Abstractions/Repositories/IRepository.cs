@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using TnEcoffe.Domain.Common;
 
-namespace TnEcoffe.Application.Abstractions.Repository;
+namespace TnEcoffe.Application.Abstractions.Repositories;
 
 public interface IRepository<T> where T : BaseEntity
 {
