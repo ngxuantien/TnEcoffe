@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using TnEcoffe.Application.Abstractions.Repositories;
 using TnEcoffe.Infrastructure.Persistence;
+using TnEcoffe.Infrastructure.Persistence.Interceptors;
 using TnEcoffe.Infrastructure.Persistence.Repositories;
 
 namespace TnEcoffe.Infrastructure;
@@ -19,10 +20,12 @@ public static class DependencyInjection
             ?? throw new InvalidOperationException("Thiếu connection string 'Default'.");
 
         services.TryAddSingleton(TimeProvider.System);
+        services.AddScoped<AuditableEntityInterceptor>();
 
         services.AddDbContext<AppDbContext>((sp, options) => options
             .UseNpgsql(connectionString)
-            .UseSnakeCaseNamingConvention());
+            .UseSnakeCaseNamingConvention()
+            .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
 
         services.AddScoped(typeof(IReadRepository<>), typeof(ReadRepository<>));
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

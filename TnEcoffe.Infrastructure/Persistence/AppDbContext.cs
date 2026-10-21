@@ -14,11 +14,13 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        // ToList(): chụp danh sách trước, vì modelBuilder.Entity(...) bên dưới có thể thay đổi model đang duyệt
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes().ToList())
         {
             var clrType = entityType.ClrType;
 
-            if (typeof(BaseEntity).IsAssignableFrom(clrType))
+            // Chỉ cấu hình Id ở entity gốc, entity con kế thừa (TPH/TPT) dùng chung khoá của entity gốc
+            if (typeof(BaseEntity).IsAssignableFrom(clrType) && entityType.BaseType is null)
             {
                 modelBuilder.Entity(clrType)
                     .Property(nameof(BaseEntity.Id))
