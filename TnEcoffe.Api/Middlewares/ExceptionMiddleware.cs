@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using TnEcoffe.Api.Common;
 using TnEcoffe.Application.Common.Exceptions;
 using TnEcoffe.Domain.Common.Errors;
 
@@ -47,7 +48,8 @@ public sealed class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionM
                     "Không thể kết nối tới dịch vụ đối tác.",
                     traceId: traceId)),
 
-            TimeoutException => (
+            // HttpClient hết thời gian chờ ném TaskCanceledException, TimeoutException nằm ở InnerException.
+            TimeoutException or TaskCanceledException { InnerException: TimeoutException } => (
                 StatusCodes.Status504GatewayTimeout,
                 BaseResponse.Fail(
                     ErrorCodes.ExternalServiceTimeout,

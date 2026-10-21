@@ -13,6 +13,11 @@ public static class PaginationExtensions
         CancellationToken ct = default)
     {
         var totalCount = await query.CountAsync(ct);
+
+        // Không có dữ liệu hoặc xin trang vượt quá tổng: khỏi chạy thêm câu SELECT
+        if (totalCount == 0 || request.Skip >= totalCount)
+            return new PagedResult<T>([], totalCount, request.Page, request.PageSize);
+
         var items = await query
             .Skip(request.Skip)
             .Take(request.PageSize)
