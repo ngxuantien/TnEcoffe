@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="TnEcoffe.API/TnEcoffe.Api.csproj">
+  <Project Path="TnEcoffe.Api/TnEcoffe.Api.csproj">
     <BuildDependency Project="TnEcoffe.Application/TnEcoffe.Application.csproj" />
     <BuildDependency Project="TnEcoffe.Infrastructure/TnEcoffe.Infrastructure.csproj" />
   </Project>
