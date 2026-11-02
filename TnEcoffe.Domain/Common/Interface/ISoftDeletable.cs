@@ -6,7 +6,6 @@ namespace TnEcoffe.Domain.Common.Interface
 {
     public interface ISoftDeletable
     {
-        bool IsDeleted { get; }
 
         DateTime? DeletedAt { get; }
 
