@@ -7,4 +7,5 @@ namespace TnEcoffe.Domain.Entites.Settings;
 
 public class StoreSetting : AuditableEntity
 {
+
 }
