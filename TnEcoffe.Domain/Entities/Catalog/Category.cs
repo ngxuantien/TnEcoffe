@@ -5,7 +5,7 @@ using TnEcoffe.Domain.Common;
 using TnEcoffe.Domain.Common.Errors;
 using TnEcoffe.Domain.Common.Interface;
 
-namespace TnEcoffe.Domain.Entites.Catalog;
+namespace TnEcoffe.Domain.Entities.Catalog;
 
 public sealed class Category : AuditableEntity, ISoftDeletable
 {

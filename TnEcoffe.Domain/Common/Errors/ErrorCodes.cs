@@ -42,6 +42,7 @@ public static class ErrorCodes
         public const string SizeDuplicated = "MENU_ITEM_SIZE_DUPLICATED";
         public const string PriceNegative = "MENU_ITEM_PRICE_NEGATIVE";
         public const string ImageUrlRequired = "MENU_ITEM_IMAGE_URL_REQUIRED";
+        public const string ImagePublicIdRequired = "MENU_ITEM_IMAGE_PUBLIC_ID_REQUIRED";
     }
 
     public static class Newsletter
