@@ -4,7 +4,7 @@ using System.Text;
 using TnEcoffe.Domain.Common;
 using TnEcoffe.Domain.Common.Errors;
 
-namespace TnEcoffe.Domain.Entites.Settings;
+namespace TnEcoffe.Domain.Entities.Settings;
 
 public sealed class SpecialDay : BaseEntity
 {
