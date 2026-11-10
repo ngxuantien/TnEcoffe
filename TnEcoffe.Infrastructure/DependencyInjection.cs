@@ -23,9 +23,10 @@ public static class DependencyInjection
         services.AddScoped<AuditableEntityInterceptor>();
 
         services.AddDbContext<AppDbContext>((sp, options) => options
-            .UseNpgsql(connectionString)
-            .UseSnakeCaseNamingConvention()
-            .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
+                .UseNpgsql(connectionString, npgsql =>
+                    npgsql.MigrationsHistoryTable("__ef_migrations_history", "system"))
+                .UseSnakeCaseNamingConvention()
+                .AddInterceptors(sp.GetRequiredService<AuditableEntityInterceptor>()));
 
         services.AddScoped(typeof(IReadRepository<>), typeof(ReadRepository<>));
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

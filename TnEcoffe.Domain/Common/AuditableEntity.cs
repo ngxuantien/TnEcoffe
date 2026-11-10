@@ -13,4 +13,6 @@ public abstract class AuditableEntity : BaseEntity
     public DateTime? UpdatedAt { get; private set; }
 
     public Guid? UpdatedBy { get; private set; }
+
+    public uint Version { get; private set; }
 }

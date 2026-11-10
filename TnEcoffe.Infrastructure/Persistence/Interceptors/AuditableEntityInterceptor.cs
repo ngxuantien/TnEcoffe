@@ -31,18 +31,15 @@ internal sealed class AuditableEntityInterceptor(ICurrentUser currentUser, TimeP
         if (context is null)
             return;
 
-        // Npgsql bắt buộc DateTime Kind=Utc khi ghi vào cột timestamptz
         var now = timeProvider.GetUtcNow().UtcDateTime;
         var userId = currentUser.UserId;
 
-        // Xoá mềm chạy trước: Deleted → Modified, để vòng dưới gán luôn UpdatedAt
         foreach (var entry in context.ChangeTracker.Entries<ISoftDeletable>())
         {
             if (entry.State != EntityState.Deleted)
                 continue;
 
             entry.State = EntityState.Modified;
-            entry.Property(nameof(ISoftDeletable.IsDeleted)).CurrentValue = true;
             entry.Property(nameof(ISoftDeletable.DeletedAt)).CurrentValue = now;
             entry.Property(nameof(ISoftDeletable.DeletedBy)).CurrentValue = userId;
         }
