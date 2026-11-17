@@ -4,11 +4,14 @@ using System.Text;
 using TnEcoffe.Domain.Common;
 using TnEcoffe.Domain.Common.Errors;
 using TnEcoffe.Domain.Common.Interface;
+using TnEcoffe.Domain.Enums.Catalog;
 
 namespace TnEcoffe.Domain.Entities.Catalog;
 
 public sealed class Category : AuditableEntity, ISoftDeletable
 {
+    public ProductKind Kind { get; private set; }
+
     public string Name { get; private set; } = default!;
 
     public string Slug { get; private set; } = default!;
@@ -25,8 +28,9 @@ public sealed class Category : AuditableEntity, ISoftDeletable
 
     private Category() { }
 
-    public Category(string name, string slug, string? description, int sortOrder)
+    public Category(ProductKind kind, string name, string slug, string? description, int sortOrder)
     {
+        Kind = kind;
         Update(name, slug, description, sortOrder, isVisible: true);
     }
 

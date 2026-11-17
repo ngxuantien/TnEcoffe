@@ -6,9 +6,9 @@ using TnEcoffe.Domain.Common.Errors;
 
 namespace TnEcoffe.Domain.Entities.Catalog;
 
-public sealed class MenuItemImage : BaseEntity
+public sealed class ProductImage : BaseEntity
 {
-    public Guid MenuItemId { get; private set; }
+    public Guid ProductId { get; private set; }
 
     public string PublicId { get; private set; } = default!;
 
@@ -20,17 +20,17 @@ public sealed class MenuItemImage : BaseEntity
 
     public bool IsPrimary { get; private set; }
 
-    private MenuItemImage() { }
+    private ProductImage() { }
 
-    internal MenuItemImage(Guid menuItemId, string publicId, string url, string? altText, bool isPrimary, int sortOrder)
+    internal ProductImage(Guid productId, string publicId, string url, string? altText, bool isPrimary, int sortOrder)
     {
         if (string.IsNullOrWhiteSpace(publicId))
-            throw new DomainException(ErrorCodes.MenuItem.ImagePublicIdRequired, "Mã ảnh không được trống.");
+            throw new DomainException(ErrorCodes.Product.ImagePublicIdRequired, "Mã ảnh không được trống.");
 
         if (string.IsNullOrWhiteSpace(url))
-            throw new DomainException(ErrorCodes.MenuItem.ImageUrlRequired, "Đường dẫn ảnh không được trống.");
+            throw new DomainException(ErrorCodes.Product.ImageUrlRequired, "Đường dẫn ảnh không được trống.");
 
-        MenuItemId = menuItemId;
+        ProductId = productId;
         PublicId = publicId.Trim();
         Url = url.Trim();
         AltText = altText?.Trim();

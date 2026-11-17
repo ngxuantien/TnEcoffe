@@ -30,19 +30,32 @@ public static class ErrorCodes
         public const string SlugRequired = "CATEGORY_SLUG_REQUIRED";
         public const string NameDuplicated = "CATEGORY_NAME_DUPLICATED";
         public const string DisplayOrderInvalid = "CATEGORY_DISPLAY_ORDER_INVALID";
-        public const string HasMenuItems = "CATEGORY_HAS_MENU_ITEMS";
+        public const string HasProducts = "CATEGORY_HAS_PRODUCTS";
     }
 
-    public static class MenuItem
+    public static class Product
     {
-        public const string NameRequired = "MENU_ITEM_NAME_REQUIRED";
-        public const string SlugRequired = "MENU_ITEM_SLUG_REQUIRED";
-        public const string SkuRequired = "MENU_ITEM_SKU_REQUIRED";
-        public const string AvailableTimeInvalid = "MENU_ITEM_AVAILABLE_TIME_INVALID";
-        public const string SizeDuplicated = "MENU_ITEM_SIZE_DUPLICATED";
-        public const string PriceNegative = "MENU_ITEM_PRICE_NEGATIVE";
-        public const string ImageUrlRequired = "MENU_ITEM_IMAGE_URL_REQUIRED";
-        public const string ImagePublicIdRequired = "MENU_ITEM_IMAGE_PUBLIC_ID_REQUIRED";
+        public const string NameRequired = "PRODUCT_NAME_REQUIRED";
+        public const string SlugRequired = "PRODUCT_SLUG_REQUIRED";
+        public const string SkuRequired = "PRODUCT_SKU_REQUIRED";
+        public const string KindMismatch = "PRODUCT_KIND_MISMATCH";
+        public const string VariantCodeRequired = "PRODUCT_VARIANT_CODE_REQUIRED";
+        public const string VariantNameRequired = "PRODUCT_VARIANT_NAME_REQUIRED";
+        public const string VariantDuplicated = "PRODUCT_VARIANT_DUPLICATED";
+        public const string PriceNegative = "PRODUCT_PRICE_NEGATIVE";
+        public const string ComparePriceInvalid = "PRODUCT_COMPARE_PRICE_INVALID";
+        public const string StockRequired = "PRODUCT_STOCK_REQUIRED";
+        public const string StockNegative = "PRODUCT_STOCK_NEGATIVE";
+        public const string WeightInvalid = "PRODUCT_WEIGHT_INVALID";
+        public const string ImageUrlRequired = "PRODUCT_IMAGE_URL_REQUIRED";
+        public const string ImagePublicIdRequired = "PRODUCT_IMAGE_PUBLIC_ID_REQUIRED";
+    }
+
+    public static class Content
+    {
+        public const string PageTitleRequired = "PAGE_TITLE_REQUIRED";
+        public const string PageSlugRequired = "PAGE_SLUG_REQUIRED";
+        public const string GalleryImageRequired = "GALLERY_IMAGE_REQUIRED";
     }
 
     public static class Newsletter
