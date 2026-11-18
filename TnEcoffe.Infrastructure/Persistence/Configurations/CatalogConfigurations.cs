@@ -14,64 +14,81 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
         b.Property(x => x.Slug).HasMaxLength(120);
         b.Property(x => x.Description).HasMaxLength(300);
 
-        // Chỉ unique trong các dòng chưa xoá, để xoá mềm rồi tạo lại cùng slug vẫn được
         b.HasIndex(x => x.Slug).IsUnique().HasFilter("deleted_at IS NULL");
     }
 }
 
-internal sealed class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
+internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
-    public void Configure(EntityTypeBuilder<MenuItem> b)
+    public void Configure(EntityTypeBuilder<Product> b)
     {
-        b.ToTable("menu_items", "catalog", t => t.HasCheckConstraint("ck_menu_items_available_time",
-            "(available_from IS NULL) = (available_to IS NULL)"));
+        b.ToTable("products", "catalog");
 
         b.Property(x => x.Name).HasMaxLength(150);
         b.Property(x => x.Slug).HasMaxLength(170);
         b.Property(x => x.Sku).HasMaxLength(30);
         b.Property(x => x.ShortDescription).HasMaxLength(200);
-        b.Property(x => x.AiTags).HasColumnType("jsonb");
 
-        // Mặc định EF để Cascade; xoá danh mục không được kéo theo xoá món nên phải khai báo
-        b.HasOne(x => x.Category).WithMany().OnDelete(DeleteBehavior.Restrict);
+        b.HasOne(x => x.Category).WithMany().HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Restrict);
+        b.HasMany(x => x.Variants).WithOne().HasForeignKey(v => v.ProductId).OnDelete(DeleteBehavior.Cascade);
+        b.HasMany(x => x.Images).WithOne().HasForeignKey(i => i.ProductId).OnDelete(DeleteBehavior.Cascade);
 
         b.HasIndex(x => x.Slug).IsUnique().HasFilter("deleted_at IS NULL");
         b.HasIndex(x => x.Sku).IsUnique().HasFilter("deleted_at IS NULL");
-        b.HasIndex(x => x.FeaturedOrder).HasDatabaseName("ix_menu_items_featured").HasFilter("is_featured AND deleted_at IS NULL");
+
+        b.HasIndex(x => new { x.Kind, x.CategoryId })
+           .HasDatabaseName("ix_products_listing")
+           .HasFilter("is_active AND deleted_at IS NULL");
+
+        b.HasIndex(x => new { x.Kind, x.FeaturedOrder })
+            .HasDatabaseName("ix_products_featured")
+            .HasFilter("is_featured AND deleted_at IS NULL");
     }
 }
 
-internal sealed class MenuItemSizeConfiguration : IEntityTypeConfiguration<MenuItemSize>
+internal sealed class ProductVariantConfiguration : IEntityTypeConfiguration<ProductVariant>
 {
-    public void Configure(EntityTypeBuilder<MenuItemSize> b)
+    public void Configure(EntityTypeBuilder<ProductVariant> b)
     {
-        b.ToTable("menu_item_sizes", "catalog", t =>
+        b.ToTable("product_variants", "catalog", t =>
         {
-            t.HasCheckConstraint("ck_menu_item_sizes_price", "price >= 0");
-            t.HasCheckConstraint("ck_menu_item_sizes_cost_price", "cost_price IS NULL OR cost_price >= 0");
+            t.HasCheckConstraint("ck_product_variants_price", "price >= 0");
+            t.HasCheckConstraint("ck_product_variants_compare_price", "compare_at_price IS NULL OR compare_at_price > price");
+            t.HasCheckConstraint("ck_product_variants_cost_price", "cost_price IS NULL OR cost_price >= 0");
+            t.HasCheckConstraint("ck_product_variants_stock", "stock_quantity IS NULL OR stock_quantity >= 0");
+            t.HasCheckConstraint("ck_product_variants_tracking", "track_inventory = (stock_quantity IS NOT NULL)");
+            t.HasCheckConstraint("ck_product_variants_weight", "weight_grams IS NULL OR weight_grams > 0");
         });
 
-        b.Property(x => x.Code).HasMaxLength(10);
-        b.Property(x => x.Name).HasMaxLength(30);
+        b.Property(x => x.Code).HasMaxLength(20);
+        b.Property(x => x.Name).HasMaxLength(50);
 
-        b.HasIndex(x => new { x.MenuItemId, x.Code }).IsUnique();
+        b.Property(x => x.Version).IsRowVersion();
 
-        // Mỗi món tối đa 1 size mặc định
-        b.HasIndex(x => x.MenuItemId).HasDatabaseName("ux_menu_item_sizes_default").IsUnique().HasFilter("is_default");
+        b.HasIndex(x => new { x.ProductId, x.Code }).IsUnique();
+
+        b.HasIndex(x => x.ProductId, "ux_product_variants_default")
+            .HasDatabaseName("ux_product_variants_default")
+            .IsUnique()
+            .HasFilter("is_default");
     }
 }
 
-internal sealed class MenuItemImageConfiguration : IEntityTypeConfiguration<MenuItemImage>
+internal sealed class ProductImageConfiguration : IEntityTypeConfiguration<ProductImage>
 {
-    public void Configure(EntityTypeBuilder<MenuItemImage> b)
+    public void Configure(EntityTypeBuilder<ProductImage> b)
     {
-        b.ToTable("menu_item_images", "catalog");
+        b.ToTable("product_images", "catalog");
 
-        b.Property(x => x.PublicId).HasMaxLength(255);
+        b.Property(x => x.PublicId).HasMaxLength(200);
         b.Property(x => x.AltText).HasMaxLength(150);
 
-        // Index thường để lấy ảnh theo món; index có filter chỉ phủ các dòng is_primary
-        b.HasIndex(x => x.MenuItemId, "ix_menu_item_images_menu_item_id");
-        b.HasIndex(x => x.MenuItemId, "ux_menu_item_images_primary").HasDatabaseName("ux_menu_item_images_primary").IsUnique().HasFilter("is_primary");
+        b.HasIndex(x => x.ProductId, "ix_product_images_product_id")
+            .HasDatabaseName("ix_product_images_product_id");
+
+        b.HasIndex(x => x.ProductId, "ux_product_images_primary")
+            .HasDatabaseName("ux_product_images_primary")
+            .IsUnique()
+            .HasFilter("is_primary");
     }
 }
