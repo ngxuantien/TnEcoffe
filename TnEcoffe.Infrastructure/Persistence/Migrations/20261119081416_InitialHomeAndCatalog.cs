@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TnEcoffe.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSettingsAndCatalog : Migration
+    public partial class InitialHomeAndCatalog : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,6 +28,7 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
+                    kind = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     slug = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
                     description = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
@@ -44,6 +45,29 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_categories", x => x.id);
+                    table.CheckConstraint("ck_categories_kind", "kind IN ('drink', 'retail')");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "gallery_images",
+                schema: "content",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    url = table.Column<string>(type: "text", nullable: false),
+                    caption = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    sort_order = table.Column<int>(type: "integer", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    updated_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_gallery_images", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -78,6 +102,31 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                     table.PrimaryKey("pk_opening_hours", x => x.id);
                     table.CheckConstraint("ck_opening_hours_day", "day_of_week BETWEEN 0 AND 6");
                     table.CheckConstraint("ck_opening_hours_time", "NOT is_open OR (open_time IS NOT NULL AND close_time IS NOT NULL AND close_time > open_time)");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "pages",
+                schema: "content",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    kind = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    slug = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    title = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    summary = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
+                    content = table.Column<string>(type: "text", nullable: false),
+                    sort_order = table.Column<int>(type: "integer", nullable: false),
+                    is_published = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    updated_by = table.Column<Guid>(type: "uuid", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_pages", x => x.id);
+                    table.CheckConstraint("ck_pages_kind", "kind IN ('about', 'policy')");
                 });
 
             migrationBuilder.CreateTable(
@@ -118,11 +167,12 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "menu_items",
+                name: "products",
                 schema: "catalog",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
+                    kind = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
                     category_id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     slug = table.Column<string>(type: "character varying(170)", maxLength: 170, nullable: false),
@@ -131,15 +181,9 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                     description = table.Column<string>(type: "text", nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     is_available = table.Column<bool>(type: "boolean", nullable: false),
-                    is_new = table.Column<bool>(type: "boolean", nullable: false),
                     is_featured = table.Column<bool>(type: "boolean", nullable: false),
                     featured_order = table.Column<int>(type: "integer", nullable: true),
-                    sell_online = table.Column<bool>(type: "boolean", nullable: false),
-                    sell_pos = table.Column<bool>(type: "boolean", nullable: false),
-                    available_from = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
-                    available_to = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
-                    ai_tags = table.Column<string>(type: "jsonb", nullable: false),
-                    ai_note = table.Column<string>(type: "text", nullable: true),
+                    is_new = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     deleted_by = table.Column<Guid>(type: "uuid", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -150,10 +194,10 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_menu_items", x => x.id);
-                    table.CheckConstraint("ck_menu_items_available_time", "(available_from IS NULL) = (available_to IS NULL)");
+                    table.PrimaryKey("pk_products", x => x.id);
+                    table.CheckConstraint("ck_products_kind", "kind IN ('drink', 'retail')");
                     table.ForeignKey(
-                        name: "fk_menu_items_categories_category_id",
+                        name: "fk_products_categories_category_id",
                         column: x => x.category_id,
                         principalSchema: "catalog",
                         principalTable: "categories",
@@ -162,13 +206,13 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "menu_item_images",
+                name: "product_images",
                 schema: "catalog",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    menu_item_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    public_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    product_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    public_id = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     url = table.Column<string>(type: "text", nullable: false),
                     alt_text = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
                     sort_order = table.Column<int>(type: "integer", nullable: false),
@@ -176,40 +220,50 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_menu_item_images", x => x.id);
+                    table.PrimaryKey("pk_product_images", x => x.id);
                     table.ForeignKey(
-                        name: "fk_menu_item_images_menu_items_menu_item_id",
-                        column: x => x.menu_item_id,
+                        name: "fk_product_images_products_product_id",
+                        column: x => x.product_id,
                         principalSchema: "catalog",
-                        principalTable: "menu_items",
+                        principalTable: "products",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "menu_item_sizes",
+                name: "product_variants",
                 schema: "catalog",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    menu_item_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    code = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    name = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    product_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    code = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     price = table.Column<long>(type: "bigint", nullable: false),
+                    compare_at_price = table.Column<long>(type: "bigint", nullable: true),
                     cost_price = table.Column<long>(type: "bigint", nullable: true),
+                    track_inventory = table.Column<bool>(type: "boolean", nullable: false),
+                    stock_quantity = table.Column<int>(type: "integer", nullable: true),
+                    weight_grams = table.Column<int>(type: "integer", nullable: true),
                     is_default = table.Column<bool>(type: "boolean", nullable: false),
-                    sort_order = table.Column<int>(type: "integer", nullable: false)
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    sort_order = table.Column<int>(type: "integer", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_menu_item_sizes", x => x.id);
-                    table.CheckConstraint("ck_menu_item_sizes_cost_price", "cost_price IS NULL OR cost_price >= 0");
-                    table.CheckConstraint("ck_menu_item_sizes_price", "price >= 0");
+                    table.PrimaryKey("pk_product_variants", x => x.id);
+                    table.CheckConstraint("ck_product_variants_compare_price", "compare_at_price IS NULL OR compare_at_price > price");
+                    table.CheckConstraint("ck_product_variants_cost_price", "cost_price IS NULL OR cost_price >= 0");
+                    table.CheckConstraint("ck_product_variants_price", "price >= 0");
+                    table.CheckConstraint("ck_product_variants_stock", "stock_quantity IS NULL OR stock_quantity >= 0");
+                    table.CheckConstraint("ck_product_variants_tracking", "track_inventory = (stock_quantity IS NOT NULL)");
+                    table.CheckConstraint("ck_product_variants_weight", "weight_grams IS NULL OR weight_grams > 0");
                     table.ForeignKey(
-                        name: "fk_menu_item_sizes_menu_items_menu_item_id",
-                        column: x => x.menu_item_id,
+                        name: "fk_product_variants_products_product_id",
+                        column: x => x.product_id,
                         principalSchema: "catalog",
-                        principalTable: "menu_items",
+                        principalTable: "products",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -233,70 +287,12 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 schema: "system",
                 table: "store_settings",
                 columns: new[] { "id", "created_at", "created_by", "key", "updated_at", "updated_by", "value" },
-                values: new object[] { new Guid("019a3000-0000-7000-8000-000000000001"), new DateTime(2026, 10, 30, 0, 0, 0, 0, DateTimeKind.Utc), null, "store_info", null, null, "{\"name\":\"[Tên quán]\",\"slogan\":\"[Slogan]\",\"address\":\"[Địa chỉ]\",\"phone\":\"[SĐT]\",\n \"email\":\"[Email]\",\"mapUrl\":null,\"social\":{\"facebook\":null,\"instagram\":null,\"zalo\":null}}" });
+                values: new object[] { new Guid("019a3000-0000-7000-8000-000000000001"), new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Utc), null, "store_info", null, null, "{\"name\":\"[Tên quán]\",\"slogan\":\"[Slogan]\",\"foundedYear\":null,\r\n \"address\":\"[Địa chỉ]\",\"phone\":\"[SĐT]\",\"email\":\"[Email]\",\"mapUrl\":null,\r\n \"social\":{\"facebook\":null,\"instagram\":null,\"tiktok\":null,\"zalo\":null}}" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_categories_slug",
                 schema: "catalog",
                 table: "categories",
-                column: "slug",
-                unique: true,
-                filter: "deleted_at IS NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_menu_item_images_menu_item_id",
-                schema: "catalog",
-                table: "menu_item_images",
-                column: "menu_item_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ux_menu_item_images_primary",
-                schema: "catalog",
-                table: "menu_item_images",
-                column: "menu_item_id",
-                unique: true,
-                filter: "is_primary");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_menu_item_sizes_menu_item_id_code",
-                schema: "catalog",
-                table: "menu_item_sizes",
-                columns: new[] { "menu_item_id", "code" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ux_menu_item_sizes_default",
-                schema: "catalog",
-                table: "menu_item_sizes",
-                column: "menu_item_id",
-                unique: true,
-                filter: "is_default");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_menu_items_category_id",
-                schema: "catalog",
-                table: "menu_items",
-                column: "category_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_menu_items_featured",
-                schema: "catalog",
-                table: "menu_items",
-                column: "featured_order",
-                filter: "is_featured AND deleted_at IS NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_menu_items_sku",
-                schema: "catalog",
-                table: "menu_items",
-                column: "sku",
-                unique: true,
-                filter: "deleted_at IS NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_menu_items_slug",
-                schema: "catalog",
-                table: "menu_items",
                 column: "slug",
                 unique: true,
                 filter: "deleted_at IS NULL");
@@ -314,6 +310,78 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 table: "opening_hours",
                 column: "day_of_week",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_pages_slug",
+                schema: "content",
+                table: "pages",
+                column: "slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_product_images_product_id",
+                schema: "catalog",
+                table: "product_images",
+                column: "product_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ux_product_images_primary",
+                schema: "catalog",
+                table: "product_images",
+                column: "product_id",
+                unique: true,
+                filter: "is_primary");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_product_variants_product_id_code",
+                schema: "catalog",
+                table: "product_variants",
+                columns: new[] { "product_id", "code" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ux_product_variants_default",
+                schema: "catalog",
+                table: "product_variants",
+                column: "product_id",
+                unique: true,
+                filter: "is_default");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_products_category_id",
+                schema: "catalog",
+                table: "products",
+                column: "category_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_products_featured",
+                schema: "catalog",
+                table: "products",
+                columns: new[] { "kind", "featured_order" },
+                filter: "is_featured AND deleted_at IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_products_listing",
+                schema: "catalog",
+                table: "products",
+                columns: new[] { "kind", "category_id" },
+                filter: "is_active AND deleted_at IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_products_sku",
+                schema: "catalog",
+                table: "products",
+                column: "sku",
+                unique: true,
+                filter: "deleted_at IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_products_slug",
+                schema: "catalog",
+                table: "products",
+                column: "slug",
+                unique: true,
+                filter: "deleted_at IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "ix_special_days_date",
@@ -334,12 +402,8 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "menu_item_images",
-                schema: "catalog");
-
-            migrationBuilder.DropTable(
-                name: "menu_item_sizes",
-                schema: "catalog");
+                name: "gallery_images",
+                schema: "content");
 
             migrationBuilder.DropTable(
                 name: "newsletter_subscribers",
@@ -350,6 +414,18 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 schema: "system");
 
             migrationBuilder.DropTable(
+                name: "pages",
+                schema: "content");
+
+            migrationBuilder.DropTable(
+                name: "product_images",
+                schema: "catalog");
+
+            migrationBuilder.DropTable(
+                name: "product_variants",
+                schema: "catalog");
+
+            migrationBuilder.DropTable(
                 name: "special_days",
                 schema: "system");
 
@@ -358,7 +434,7 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                 schema: "system");
 
             migrationBuilder.DropTable(
-                name: "menu_items",
+                name: "products",
                 schema: "catalog");
 
             migrationBuilder.DropTable(
