@@ -3,10 +3,11 @@
 public sealed record StoreInfoDto(
     string Name,
     string? Slogan,
+    int? FoundedYear,
     string? Address,
     string? Phone,
     string? Email,
     string? MapUrl,
     SocialLinksDto Social);
 
-public sealed record SocialLinksDto(string? Facebook, string? Instagram, string? Zalo);
+public sealed record SocialLinksDto(string? Facebook, string? Instagram, string? Tiktok, string? Zalo);
