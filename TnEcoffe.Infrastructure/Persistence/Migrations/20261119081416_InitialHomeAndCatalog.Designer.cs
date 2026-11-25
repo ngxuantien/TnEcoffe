@@ -12,8 +12,8 @@ using TnEcoffe.Infrastructure.Persistence;
 namespace TnEcoffe.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261104084855_InitialSettingsAndCatalog")]
-    partial class InitialSettingsAndCatalog
+    [Migration("20261119081416_InitialHomeAndCatalog")]
+    partial class InitialHomeAndCatalog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,6 +56,12 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_visible");
 
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("kind");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -94,31 +100,17 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_categories_slug")
                         .HasFilter("deleted_at IS NULL");
 
-                    b.ToTable("categories", "catalog");
+                    b.ToTable("categories", "catalog", t =>
+                        {
+                            t.HasCheckConstraint("ck_categories_kind", "kind IN ('drink', 'retail')");
+                        });
                 });
 
-            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.MenuItem", b =>
+            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<string>("AiNote")
-                        .HasColumnType("text")
-                        .HasColumnName("ai_note");
-
-                    b.Property<string>("AiTags")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ai_tags");
-
-                    b.Property<TimeOnly?>("AvailableFrom")
-                        .HasColumnType("time without time zone")
-                        .HasColumnName("available_from");
-
-                    b.Property<TimeOnly?>("AvailableTo")
-                        .HasColumnType("time without time zone")
-                        .HasColumnName("available_to");
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid")
@@ -164,19 +156,17 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_new");
 
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("kind");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)")
                         .HasColumnName("name");
-
-                    b.Property<bool>("SellOnline")
-                        .HasColumnType("boolean")
-                        .HasColumnName("sell_online");
-
-                    b.Property<bool>("SellPos")
-                        .HasColumnType("boolean")
-                        .HasColumnName("sell_pos");
 
                     b.Property<string>("ShortDescription")
                         .HasMaxLength(200)
@@ -210,32 +200,36 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                         .HasColumnName("xmin");
 
                     b.HasKey("Id")
-                        .HasName("pk_menu_items");
+                        .HasName("pk_products");
 
                     b.HasIndex("CategoryId")
-                        .HasDatabaseName("ix_menu_items_category_id");
-
-                    b.HasIndex("FeaturedOrder")
-                        .HasDatabaseName("ix_menu_items_featured")
-                        .HasFilter("is_featured AND deleted_at IS NULL");
+                        .HasDatabaseName("ix_products_category_id");
 
                     b.HasIndex("Sku")
                         .IsUnique()
-                        .HasDatabaseName("ix_menu_items_sku")
+                        .HasDatabaseName("ix_products_sku")
                         .HasFilter("deleted_at IS NULL");
 
                     b.HasIndex("Slug")
                         .IsUnique()
-                        .HasDatabaseName("ix_menu_items_slug")
+                        .HasDatabaseName("ix_products_slug")
                         .HasFilter("deleted_at IS NULL");
 
-                    b.ToTable("menu_items", "catalog", t =>
+                    b.HasIndex("Kind", "CategoryId")
+                        .HasDatabaseName("ix_products_listing")
+                        .HasFilter("is_active AND deleted_at IS NULL");
+
+                    b.HasIndex("Kind", "FeaturedOrder")
+                        .HasDatabaseName("ix_products_featured")
+                        .HasFilter("is_featured AND deleted_at IS NULL");
+
+                    b.ToTable("products", "catalog", t =>
                         {
-                            t.HasCheckConstraint("ck_menu_items_available_time", "(available_from IS NULL) = (available_to IS NULL)");
+                            t.HasCheckConstraint("ck_products_kind", "kind IN ('drink', 'retail')");
                         });
                 });
 
-            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.MenuItemImage", b =>
+            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.ProductImage", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -250,14 +244,14 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_primary");
 
-                    b.Property<Guid>("MenuItemId")
+                    b.Property<Guid>("ProductId")
                         .HasColumnType("uuid")
-                        .HasColumnName("menu_item_id");
+                        .HasColumnName("product_id");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
                         .HasColumnName("public_id");
 
                     b.Property<int>("SortOrder")
@@ -270,20 +264,20 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                         .HasColumnName("url");
 
                     b.HasKey("Id")
-                        .HasName("pk_menu_item_images");
+                        .HasName("pk_product_images");
 
-                    b.HasIndex(new[] { "MenuItemId" }, "ix_menu_item_images_menu_item_id")
-                        .HasDatabaseName("ix_menu_item_images_menu_item_id");
+                    b.HasIndex(new[] { "ProductId" }, "ix_product_images_product_id")
+                        .HasDatabaseName("ix_product_images_product_id");
 
-                    b.HasIndex(new[] { "MenuItemId" }, "ux_menu_item_images_primary")
+                    b.HasIndex(new[] { "ProductId" }, "ux_product_images_primary")
                         .IsUnique()
-                        .HasDatabaseName("ux_menu_item_images_primary")
+                        .HasDatabaseName("ux_product_images_primary")
                         .HasFilter("is_primary");
 
-                    b.ToTable("menu_item_images", "catalog");
+                    b.ToTable("product_images", "catalog");
                 });
 
-            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.MenuItemSize", b =>
+            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.ProductVariant", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -291,54 +285,146 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("code");
+
+                    b.Property<long?>("CompareAtPrice")
+                        .HasColumnType("bigint")
+                        .HasColumnName("compare_at_price");
 
                     b.Property<long?>("CostPrice")
                         .HasColumnType("bigint")
                         .HasColumnName("cost_price");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
                     b.Property<bool>("IsDefault")
                         .HasColumnType("boolean")
                         .HasColumnName("is_default");
 
-                    b.Property<Guid>("MenuItemId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("menu_item_id");
-
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("name");
 
                     b.Property<long>("Price")
                         .HasColumnType("bigint")
                         .HasColumnName("price");
 
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer")
                         .HasColumnName("sort_order");
 
-                    b.HasKey("Id")
-                        .HasName("pk_menu_item_sizes");
+                    b.Property<int?>("StockQuantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("stock_quantity");
 
-                    b.HasIndex("MenuItemId")
+                    b.Property<bool>("TrackInventory")
+                        .HasColumnType("boolean")
+                        .HasColumnName("track_inventory");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<int?>("WeightGrams")
+                        .HasColumnType("integer")
+                        .HasColumnName("weight_grams");
+
+                    b.HasKey("Id")
+                        .HasName("pk_product_variants");
+
+                    b.HasIndex("ProductId", "Code")
                         .IsUnique()
-                        .HasDatabaseName("ux_menu_item_sizes_default")
+                        .HasDatabaseName("ix_product_variants_product_id_code");
+
+                    b.HasIndex(new[] { "ProductId" }, "ux_product_variants_default")
+                        .IsUnique()
+                        .HasDatabaseName("ux_product_variants_default")
                         .HasFilter("is_default");
 
-                    b.HasIndex("MenuItemId", "Code")
-                        .IsUnique()
-                        .HasDatabaseName("ix_menu_item_sizes_menu_item_id_code");
-
-                    b.ToTable("menu_item_sizes", "catalog", t =>
+                    b.ToTable("product_variants", "catalog", t =>
                         {
-                            t.HasCheckConstraint("ck_menu_item_sizes_cost_price", "cost_price IS NULL OR cost_price >= 0");
+                            t.HasCheckConstraint("ck_product_variants_compare_price", "compare_at_price IS NULL OR compare_at_price > price");
 
-                            t.HasCheckConstraint("ck_menu_item_sizes_price", "price >= 0");
+                            t.HasCheckConstraint("ck_product_variants_cost_price", "cost_price IS NULL OR cost_price >= 0");
+
+                            t.HasCheckConstraint("ck_product_variants_price", "price >= 0");
+
+                            t.HasCheckConstraint("ck_product_variants_stock", "stock_quantity IS NULL OR stock_quantity >= 0");
+
+                            t.HasCheckConstraint("ck_product_variants_tracking", "track_inventory = (stock_quantity IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_product_variants_weight", "weight_grams IS NULL OR weight_grams > 0");
                         });
+                });
+
+            modelBuilder.Entity("TnEcoffe.Domain.Entities.Content.GalleryImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Caption")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("caption");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("public_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("url");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_gallery_images");
+
+                    b.ToTable("gallery_images", "content");
                 });
 
             modelBuilder.Entity("TnEcoffe.Domain.Entities.Content.NewsletterSubscriber", b =>
@@ -375,6 +461,83 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_newsletter_subscribers_email");
 
                     b.ToTable("newsletter_subscribers", "content");
+                });
+
+            modelBuilder.Entity("TnEcoffe.Domain.Entities.Content.Page", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_published");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("slug");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("summary");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_pages");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ix_pages_slug");
+
+                    b.ToTable("pages", "content", t =>
+                        {
+                            t.HasCheckConstraint("ck_pages_kind", "kind IN ('about', 'policy')");
+                        });
                 });
 
             modelBuilder.Entity("TnEcoffe.Domain.Entities.Settings.OpeningHour", b =>
@@ -564,49 +727,49 @@ namespace TnEcoffe.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("019a3000-0000-7000-8000-000000000001"),
-                            CreatedAt = new DateTime(2026, 10, 30, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedAt = new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Utc),
                             Key = "store_info",
-                            Value = "{\"name\":\"[Tên quán]\",\"slogan\":\"[Slogan]\",\"address\":\"[Địa chỉ]\",\"phone\":\"[SĐT]\",\n \"email\":\"[Email]\",\"mapUrl\":null,\"social\":{\"facebook\":null,\"instagram\":null,\"zalo\":null}}"
+                            Value = "{\"name\":\"[Tên quán]\",\"slogan\":\"[Slogan]\",\"foundedYear\":null,\r\n \"address\":\"[Địa chỉ]\",\"phone\":\"[SĐT]\",\"email\":\"[Email]\",\"mapUrl\":null,\r\n \"social\":{\"facebook\":null,\"instagram\":null,\"tiktok\":null,\"zalo\":null}}"
                         });
                 });
 
-            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.MenuItem", b =>
+            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.Product", b =>
                 {
                     b.HasOne("TnEcoffe.Domain.Entities.Catalog.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_menu_items_categories_category_id");
+                        .HasConstraintName("fk_products_categories_category_id");
 
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.MenuItemImage", b =>
+            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.ProductImage", b =>
                 {
-                    b.HasOne("TnEcoffe.Domain.Entities.Catalog.MenuItem", null)
+                    b.HasOne("TnEcoffe.Domain.Entities.Catalog.Product", null)
                         .WithMany("Images")
-                        .HasForeignKey("MenuItemId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_menu_item_images_menu_items_menu_item_id");
+                        .HasConstraintName("fk_product_images_products_product_id");
                 });
 
-            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.MenuItemSize", b =>
+            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.ProductVariant", b =>
                 {
-                    b.HasOne("TnEcoffe.Domain.Entities.Catalog.MenuItem", null)
-                        .WithMany("Sizes")
-                        .HasForeignKey("MenuItemId")
+                    b.HasOne("TnEcoffe.Domain.Entities.Catalog.Product", null)
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_menu_item_sizes_menu_items_menu_item_id");
+                        .HasConstraintName("fk_product_variants_products_product_id");
                 });
 
-            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.MenuItem", b =>
+            modelBuilder.Entity("TnEcoffe.Domain.Entities.Catalog.Product", b =>
                 {
                     b.Navigation("Images");
 
-                    b.Navigation("Sizes");
+                    b.Navigation("Variants");
                 });
 #pragma warning restore 612, 618
         }

@@ -20,10 +20,11 @@ internal sealed class StoreSettingConfiguration : IEntityTypeConfiguration<Store
             Id = Guid.Parse("019a3000-0000-7000-8000-000000000001"),
             Key = "store_info",
             Value = """
-                {"name":"[Tên quán]","slogan":"[Slogan]","address":"[Địa chỉ]","phone":"[SĐT]",
-                 "email":"[Email]","mapUrl":null,"social":{"facebook":null,"instagram":null,"zalo":null}}
+                {"name":"[Tên quán]","slogan":"[Slogan]","foundedYear":null,
+                 "address":"[Địa chỉ]","phone":"[SĐT]","email":"[Email]","mapUrl":null,
+                 "social":{"facebook":null,"instagram":null,"tiktok":null,"zalo":null}}
                 """,
-            CreatedAt = new DateTime(2026, 10, 30, 0, 0, 0, DateTimeKind.Utc)
+            CreatedAt = new DateTime(2026, 11, 16, 0, 0, 0, DateTimeKind.Utc)
         });
     }
 }
